@@ -1,8 +1,8 @@
 {
   "name": "kupipodariday-backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Yandex Practicum Nest.js pet project",
+  "author": "Isaac Shir",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
