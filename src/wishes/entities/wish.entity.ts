@@ -1,10 +1,16 @@
 import { IsUrl, Length } from 'class-validator';
+import { Offer } from 'src/offers/entities/offer.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  ManyToMany,
+  OneToMany,
 } from 'typeorm';
 
 @Entity('wishes')
@@ -29,10 +35,10 @@ export class Wish {
   @IsUrl()
   image: string;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2 })
   raised: number;
 
   @Column()
@@ -42,7 +48,12 @@ export class Wish {
   @Column()
   copied: number;
 
-  // owner
+  @ManyToOne(() => User, (user) => user.wishes)
+  owner: User;
 
-  // offers
+  @OneToMany(() => Offer, (offer) => offer.item)
+  offers: Offer[];
+
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  wishlists: Wishlist[];
 }
