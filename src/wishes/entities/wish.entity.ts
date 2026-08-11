@@ -38,14 +38,14 @@ export class Wish {
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   raised: number;
 
   @Column()
   @Length(1, 1024)
   description: string;
 
-  @Column()
+  @Column({ default: 0 })
   copied: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
