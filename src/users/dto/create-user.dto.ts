@@ -4,6 +4,7 @@ import {
   IsString,
   IsUrl,
   Length,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 
@@ -13,8 +14,9 @@ export class CreateUserDto {
   username: string;
 
   @IsString()
-  @Length(0, 200)
-  about?: string;
+  @IsOptional()
+  @MaxLength(200)
+  about = 'Пока ничего не рассказал о себе';
 
   @IsOptional()
   @IsUrl()
