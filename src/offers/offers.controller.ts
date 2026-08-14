@@ -20,23 +20,18 @@ export class OffersController {
     return this.offersService.create(createOfferDto);
   }
 
-  @Get()
-  findAll() {
-    return this.offersService.findAll();
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.offersService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOfferDto: UpdateOfferDto) {
-    return this.offersService.update(+id, updateOfferDto);
+  updateOne(@Param('id') id: string, @Body() updateOfferDto: UpdateOfferDto) {
+    return this.offersService.updateOne(+id, updateOfferDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.offersService.remove(+id);
+  removeOne(@Param('id') id: string) {
+    return this.offersService.removeOne(+id);
   }
 }

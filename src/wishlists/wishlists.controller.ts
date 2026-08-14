@@ -20,26 +20,21 @@ export class WishlistsController {
     return this.wishlistsService.create(createWishlistDto);
   }
 
-  @Get()
-  findAll() {
-    return this.wishlistsService.findAll();
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.wishlistsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(
+  updateOne(
     @Param('id') id: string,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    return this.wishlistsService.update(+id, updateWishlistDto);
+    return this.wishlistsService.updateOne(+id, updateWishlistDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishlistsService.remove(+id);
+  removeOne(@Param('id') id: string) {
+    return this.wishlistsService.removeOne(+id);
   }
 }
