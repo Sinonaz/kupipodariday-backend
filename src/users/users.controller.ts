@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
   ForbiddenException,
-  NotFoundException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,41 +27,36 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const user = await this.usersService.findOne({ id: +id });
-
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
-    }
-
-    return user;
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.usersService.findOne({ id });
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async updateOne(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: { user: User },
   ) {
-    if (req.user.id !== +id) {
-      throw new ForbiddenException(
-        'You do not have rights to update this profile',
-      );
-    }
+    this.ensureOwner(req.user.id, id);
 
     return await this.usersService.updateOne(+id, updateUserDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async removeOne(@Param('id') id: string, @Req() req: { user: User }) {
-    if (req.user.id !== +id) {
-      throw new ForbiddenException(
-        'You do not have rights to delete this profile',
-      );
-    }
+  async removeOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: User },
+  ) {
+    this.ensureOwner(req.user.id, id);
 
     return await this.usersService.removeOne(+id);
+  }
+
+  private ensureOwner(currentUserId: number, targetId: number) {
+    if (currentUserId !== targetId) {
+      throw new ForbiddenException('You do not have rights to do this action');
+    }
   }
 }

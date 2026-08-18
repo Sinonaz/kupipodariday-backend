@@ -29,7 +29,13 @@ export class UsersService {
   }
 
   async findOne(query: FindOptionsWhere<User>) {
-    return await this.usersRepository.findOne({ where: query });
+    const user = await this.usersRepository.findOne({ where: query });
+
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }
+
+    return user;
   }
 
   async updateOne(id: number, updateUserDto: UpdateUserDto) {
