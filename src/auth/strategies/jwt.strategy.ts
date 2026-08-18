@@ -6,13 +6,10 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private configService: ConfigService,
-    private userService: UsersService,
-  ) {
+  constructor(configService: ConfigService, private userService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get('JWT_SECRET', 'jwt_secret'),
+      secretOrKey: configService.get<string>('JWT_SECRET', 'jwt_secret'),
     });
   }
 
@@ -23,6 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    return user;
+    const { password: _, ...res } = user;
+
+    return res;
   }
 }

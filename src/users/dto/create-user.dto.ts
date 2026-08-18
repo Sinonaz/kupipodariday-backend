@@ -16,11 +16,11 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   @MaxLength(200)
-  about = 'Пока ничего не рассказал о себе';
+  about: string;
 
   @IsOptional()
   @IsUrl()
-  avatar = 'https://i.pravatar.cc/300';
+  avatar: string;
 
   @IsEmail()
   email: string;

@@ -6,10 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  UseGuards,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -22,12 +28,29 @@ export class UsersController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.usersService.findOne({ id: +id });
+    const user = await this.usersService.findOne({ id: +id });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
   }
 
   @Patch(':id')
-  updateOne(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateOne(+id, updateUserDto);
+  @UseGuards(JwtAuthGuard)
+  async updateOne(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: { user: User },
+  ) {
+    if (req.user.id !== +id) {
+      throw new ForbiddenException(
+        'You do not have rights to update this profile',
+      );
+    }
+
+    return await this.usersService.updateOne(+id, updateUserDto);
   }
 
   @Delete(':id')

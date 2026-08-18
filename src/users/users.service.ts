@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,18 +9,20 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
+  private saltRounds: number;
+
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     private configService: ConfigService,
-  ) {}
+  ) {
+    this.saltRounds =
+      Number(this.configService.get<string>('HASH_SALT', '10')) || 10;
+  }
 
   async create(createUserDto: CreateUserDto) {
-    const saltRounds =
-      Number(this.configService.get<string>('HASH_SALT', '10')) || 10;
-
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
-      saltRounds,
+      this.saltRounds,
     );
 
     return await this.usersRepository.save({
@@ -33,8 +35,23 @@ export class UsersService {
     return await this.usersRepository.findOne({ where: query });
   }
 
-  updateOne(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateOne(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    const { password, ...rest } = updateUserDto;
+    const data: Partial<User> = { ...rest };
+
+    if (password) {
+      data.password = await bcrypt.hash(password, this.saltRounds);
+    }
+
+    Object.assign(user, data);
+
+    return await this.usersRepository.save(user);
   }
 
   removeOne(id: number) {
