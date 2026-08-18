@@ -54,7 +54,14 @@ export class UsersController {
   }
 
   @Delete(':id')
-  removeOne(@Param('id') id: string) {
-    return this.usersService.removeOne(+id);
+  @UseGuards(JwtAuthGuard)
+  async removeOne(@Param('id') id: string, @Req() req: { user: User }) {
+    if (req.user.id !== +id) {
+      throw new ForbiddenException(
+        'You do not have rights to delete this profile',
+      );
+    }
+
+    return await this.usersService.removeOne(+id);
   }
 }
