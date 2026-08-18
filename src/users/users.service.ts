@@ -20,10 +20,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      this.saltRounds,
-    );
+    const hashedPassword = await this.getHashPassword(createUserDto.password);
 
     return await this.usersRepository.save({
       ...createUserDto,
@@ -36,17 +33,12 @@ export class UsersService {
   }
 
   async updateOne(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.findOne({ where: { id } });
-
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
-    }
-
+    const user = await this.findByIdOrFail(id);
     const { password, ...rest } = updateUserDto;
     const data: Partial<User> = { ...rest };
 
     if (password) {
-      data.password = await bcrypt.hash(password, this.saltRounds);
+      data.password = await this.getHashPassword(password);
     }
 
     Object.assign(user, data);
@@ -55,12 +47,22 @@ export class UsersService {
   }
 
   async removeOne(id: number) {
+    const user = await this.findByIdOrFail(id);
+
+    return await this.usersRepository.remove(user);
+  }
+
+  private async findByIdOrFail(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return await this.usersRepository.remove(user);
+    return user;
+  }
+
+  private async getHashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, this.saltRounds);
   }
 }
