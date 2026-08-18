@@ -22,36 +22,33 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.usersService.findOne({ id });
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOne({ id });
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  async updateOne(
+  updateOne(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: { user: User },
   ) {
     this.ensureOwner(req.user.id, id);
 
-    return await this.usersService.updateOne(+id, updateUserDto);
+    return this.usersService.updateOne(+id, updateUserDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async removeOne(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: User },
-  ) {
+  removeOne(@Param('id', ParseIntPipe) id: number, @Req() req: { user: User }) {
     this.ensureOwner(req.user.id, id);
 
-    return await this.usersService.removeOne(+id);
+    return this.usersService.removeOne(+id);
   }
 
   private ensureOwner(currentUserId: number, targetId: number) {
