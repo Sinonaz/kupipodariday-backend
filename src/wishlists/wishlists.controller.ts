@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
@@ -20,9 +21,14 @@ export class WishlistsController {
     return this.wishlistsService.create(createWishlistDto);
   }
 
+  @Get()
+  findAll() {
+    return this.wishlistsService.findAll();
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishlistsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.wishlistsService.findOne(id);
   }
 
   @Patch(':id')
