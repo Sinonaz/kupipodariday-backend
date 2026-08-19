@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
-import { WishlistsService } from './wishlists.service';
-import { WishlistsController } from './wishlists.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { Wishlist } from './entities/wishlist.entity';
+import { WishlistOwnershipGuard } from './guards/wishlist-ownership.guard';
+import { WishlistsController } from './wishlists.controller';
+import { WishlistsService } from './wishlists.service';
+import { Wish } from '@/wishes/entities/wish.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wishlist])],
+  imports: [TypeOrmModule.forFeature([Wishlist, Wish])],
   controllers: [WishlistsController],
-  providers: [WishlistsService],
+  providers: [WishlistsService, JwtAuthGuard, WishlistOwnershipGuard],
 })
 export class WishlistsModule {}

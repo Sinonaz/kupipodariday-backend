@@ -33,10 +33,12 @@ export class UsersService {
 
     const hashedPassword = await this.getHashPassword(createUserDto.password);
 
-    return await this.usersRepository.save({
+    const { password: _, ...newUser } = await this.usersRepository.save({
       ...createUserDto,
       password: hashedPassword,
     });
+
+    return newUser;
   }
 
   async findOne(query: FindOptionsWhere<User>) {
