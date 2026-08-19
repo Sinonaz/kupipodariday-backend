@@ -6,18 +6,19 @@ import {
   Patch,
   Param,
   Delete,
-  Req,
   UseGuards,
-  ForbiddenException,
   ParseIntPipe,
+  UseFilters,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { OwnershipGuard } from '@/auth/guards/ownership.guard';
+import { HttpExceptionFilter } from '@/filters/http-exception.filter';
 
 @Controller('users')
+@UseFilters(HttpExceptionFilter)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -32,28 +33,17 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   updateOne(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
-    @Req() req: { user: User },
   ) {
-    this.ensureOwner(req.user.id, id);
-
-    return this.usersService.updateOne(+id, updateUserDto);
+    return this.usersService.updateOne(id, updateUserDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  removeOne(@Param('id', ParseIntPipe) id: number, @Req() req: { user: User }) {
-    this.ensureOwner(req.user.id, id);
-
-    return this.usersService.removeOne(+id);
-  }
-
-  private ensureOwner(currentUserId: number, targetId: number) {
-    if (currentUserId !== targetId) {
-      throw new ForbiddenException('You do not have rights to do this action');
-    }
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  removeOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.removeOne(id);
   }
 }

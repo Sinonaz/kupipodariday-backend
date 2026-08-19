@@ -1,5 +1,5 @@
-import { User } from 'src/users/entities/user.entity';
-import { Wish } from 'src/wishes/entities/wish.entity';
+import { User } from '@/users/entities/user.entity';
+import { Wish } from '@/wishes/entities/wish.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

@@ -1,5 +1,5 @@
 import { IsUrl, Length, MaxLength } from 'class-validator';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '@/users/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,7 +10,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Wish } from 'src/wishes/entities/wish.entity';
+import { Wish } from '@/wishes/entities/wish.entity';
 
 @Entity('wishlists')
 export class Wishlist {

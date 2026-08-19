@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { UserAlreadyExistsException } from '@/exceptions/user-already-exists.exception';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,16 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
+    const { username, email } = createUserDto;
+
+    const existingUser = await this.usersRepository.findOne({
+      where: [{ username }, { email }],
+    });
+
+    if (existingUser) {
+      throw new UserAlreadyExistsException();
+    }
+
     const hashedPassword = await this.getHashPassword(createUserDto.password);
 
     return await this.usersRepository.save({
