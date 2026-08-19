@@ -6,6 +6,11 @@ import { TypeormExceptionFilter } from './filters/typeorm-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -15,6 +20,6 @@ async function bootstrap() {
   app.useGlobalFilters(new TypeormExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  await app.listen(3000);
+  await app.listen(3001);
 }
 bootstrap();
