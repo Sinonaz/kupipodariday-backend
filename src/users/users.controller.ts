@@ -1,63 +1,66 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
+  NotFoundException,
   Param,
-  Delete,
+  Patch,
+  Post,
   Req,
   UseGuards,
-  ParseIntPipe,
-  UseFilters,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUsersDto } from './dto/find-users.dto';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { OwnershipGuard } from '@/auth/guards/ownership.guard';
-import { HttpExceptionFilter } from '@/filters/http-exception.filter';
 
 @Controller('users')
-@UseFilters(HttpExceptionFilter)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  findMe(@Req() req: { user: User }) {
+  findOwn(@Req() req: { user: User }) {
     return req.user;
   }
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
-  updateMe(@Body() updateUserDto: UpdateUserDto, @Req() req: { user: User }) {
-    return this.usersService.updateOne(req.user.id, updateUserDto);
+  update(@Body() updateUserDto: UpdateUserDto, @Req() req: { user: User }) {
+    return this.usersService.updateOne({ id: req.user.id }, updateUserDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne({ id });
+  @Get('me/wishes')
+  @UseGuards(JwtAuthGuard)
+  getOwnWishes(@Req() req: { user: User }) {
+    return this.usersService.getWishes(req.user.id);
   }
 
-  @Patch(':id')
-  @UseGuards(JwtAuthGuard, OwnershipGuard)
-  updateOne(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.updateOne(id, updateUserDto);
+  @Post('find')
+  @UseGuards(JwtAuthGuard)
+  findMany(@Body() findUsersDto: FindUsersDto) {
+    const { query } = findUsersDto;
+
+    return this.usersService.findMany([{ username: query }, { email: query }]);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard, OwnershipGuard)
-  removeOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.removeOne(id);
+  @Get(':username')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('username') username: string) {
+    const user = await this.usersService.findOne({ username });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const { email: _email, password: _password, ...publicProfile } = user;
+    return publicProfile;
+  }
+
+  @Get(':username/wishes')
+  @UseGuards(JwtAuthGuard)
+  getWishes(@Param('username') username: string) {
+    return this.usersService.getWishesByUsername(username);
   }
 }

@@ -5,12 +5,11 @@ import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { OwnershipGuard } from '@/auth/guards/ownership.guard';
 
 @Module({
   exports: [UsersService],
   imports: [TypeOrmModule.forFeature([User]), ConfigModule.forRoot()],
   controllers: [UsersController],
-  providers: [UsersService, JwtAuthGuard, OwnershipGuard],
+  providers: [UsersService, JwtAuthGuard],
 })
 export class UsersModule {}

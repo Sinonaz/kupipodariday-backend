@@ -33,52 +33,71 @@ export class UsersService {
 
     const hashedPassword = await this.getHashPassword(createUserDto.password);
 
-    const { password: _, ...newUser } = await this.usersRepository.save({
+    const newUser = await this.usersRepository.save({
       ...createUserDto,
       password: hashedPassword,
     });
 
-    return newUser;
+    const { password: _, ...result } = newUser;
+    return result;
   }
 
-  async findOne(query: FindOptionsWhere<User>) {
-    const user = await this.usersRepository.findOne({ where: query });
+  async findOne(query: FindOptionsWhere<User>): Promise<User | null> {
+    return this.usersRepository.findOne({ where: query });
+  }
+
+  async findMany(
+    query: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+  ): Promise<User[]> {
+    return this.usersRepository.find({ where: query });
+  }
+
+  async updateOne(
+    query: FindOptionsWhere<User>,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.findOne(query);
 
     if (!user) {
-      throw new NotFoundException(`User not found`);
+      throw new NotFoundException('User not found');
     }
 
-    return user;
-  }
-
-  async updateOne(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findByIdOrFail(id);
     const { password, ...rest } = updateUserDto;
-    const data: Partial<User> = { ...rest };
+    Object.assign(user, rest);
 
     if (password) {
-      data.password = await this.getHashPassword(password);
+      user.password = await this.getHashPassword(password);
     }
 
-    Object.assign(user, data);
-
-    return await this.usersRepository.save(user);
+    return this.usersRepository.save(user);
   }
 
-  async removeOne(id: number) {
-    const user = await this.findByIdOrFail(id);
-
-    return await this.usersRepository.remove(user);
-  }
-
-  private async findByIdOrFail(id: number): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async removeOne(query: FindOptionsWhere<User>): Promise<User> {
+    const user = await this.findOne(query);
 
     if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException('User not found');
     }
 
-    return user;
+    return this.usersRepository.remove(user);
+  }
+
+  async getWishes(userId: number) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: { wishes: { owner: true, offers: { user: true } } },
+    });
+
+    return user?.wishes ?? [];
+  }
+
+  async getWishesByUsername(username: string) {
+    const user = await this.usersRepository.findOne({
+      where: { username },
+      relations: { wishes: { offers: { user: true } } },
+    });
+
+    return user?.wishes ?? [];
   }
 
   private async getHashPassword(password: string): Promise<string> {
