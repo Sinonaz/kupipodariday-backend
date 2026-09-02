@@ -1,4 +1,4 @@
-import { IsUrl, Length, MaxLength } from 'class-validator';
+import { IsUrl, Length } from 'class-validator';
 import { User } from '@/users/entities/user.entity';
 import {
   Entity,
@@ -26,10 +26,6 @@ export class Wishlist {
   @Column()
   @Length(1, 250)
   name: string;
-
-  @Column()
-  @MaxLength(1500)
-  description: string;
 
   @Column()
   @IsUrl()

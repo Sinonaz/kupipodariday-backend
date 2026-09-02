@@ -18,6 +18,9 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'jwt_secret'),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d'),
+        },
       }),
       inject: [ConfigService],
     }),

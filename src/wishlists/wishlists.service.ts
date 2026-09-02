@@ -27,7 +27,6 @@ export class WishlistsService {
 
     const wishlist = this.wishlistsRepository.create({
       ...rest,
-      description: '',
       items,
       owner: { id: ownerId },
     });

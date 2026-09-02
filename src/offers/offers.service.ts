@@ -101,14 +101,14 @@ export class OffersService {
 
   async findAll(): Promise<Offer[]> {
     return this.offersRepository.find({
-      relations: { item: true, user: true },
+      relations: { item: { owner: true, offers: true }, user: true },
     });
   }
 
   async findOfferById(id: number): Promise<Offer> {
     const offer = await this.offersRepository.findOne({
       where: { id },
-      relations: { item: true, user: true },
+      relations: { item: { owner: true, offers: true }, user: true },
     });
 
     if (!offer) {
