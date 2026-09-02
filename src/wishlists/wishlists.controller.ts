@@ -16,7 +16,7 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { WishlistOwnershipGuard } from './guards/wishlist-ownership.guard';
 import { WishlistsService } from './wishlists.service';
 
-@Controller('wishlists')
+@Controller('wishlistlists')
 export class WishlistsController {
   constructor(private readonly wishlistsService: WishlistsService) {}
 
@@ -35,8 +35,9 @@ export class WishlistsController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.wishlistsService.findOne(id);
+    return this.wishlistsService.findWishlistById(id);
   }
 
   @Patch(':id')
@@ -45,12 +46,12 @@ export class WishlistsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    return this.wishlistsService.updateOne(id, updateWishlistDto);
+    return this.wishlistsService.updateOne({ id }, updateWishlistDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, WishlistOwnershipGuard)
   removeOne(@Param('id', ParseIntPipe) id: number) {
-    return this.wishlistsService.removeOne(id);
+    return this.wishlistsService.removeOne({ id });
   }
 }

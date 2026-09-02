@@ -20,8 +20,6 @@ export class OffersService {
     private readonly wishesRepository: Repository<Wish>,
   ) {}
 
-  // Базовые CRUD-методы (без бизнес-проверок)
-
   async create(createOfferDto: CreateOfferDto, userId: number): Promise<Offer> {
     const offer = this.offersRepository.create({
       amount: createOfferDto.amount,
@@ -66,8 +64,6 @@ export class OffersService {
     return this.offersRepository.remove(offer);
   }
 
-  // Бизнес-методы (проверки + вызов базовых CRUD)
-
   async createOffer(
     createOfferDto: CreateOfferDto,
     userId: number,
@@ -82,7 +78,7 @@ export class OffersService {
     }
 
     if (wish.owner.id === userId) {
-      throw new ForbiddenException('Нельзя скинуться на собственный подарок');
+      throw new ForbiddenException('You cannot contribute to your own wish');
     }
 
     const raised = Number(wish.raised) || 0;
@@ -91,7 +87,7 @@ export class OffersService {
 
     if (raised + amount > price) {
       throw new BadRequestException(
-        'Сумма собранных средств не может превышать стоимость подарка',
+        'The total raised amount cannot exceed the wish price',
       );
     }
 
