@@ -6,7 +6,6 @@ export class CreateWishDto {
   name: string;
 
   @IsString()
-  @IsUrl()
   link: string;
 
   @IsString()
