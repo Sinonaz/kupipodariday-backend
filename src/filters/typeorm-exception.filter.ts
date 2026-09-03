@@ -27,7 +27,7 @@ export class TypeormExceptionFilter implements ExceptionFilter {
     switch (code) {
       case '23505': // unique_violation
         status = HttpStatus.CONFLICT;
-        message = 'User with this email or username already exists';
+        message = 'Record with this data already exists';
         error = 'Conflict';
         break;
       case '23503': // foreign_key_violation

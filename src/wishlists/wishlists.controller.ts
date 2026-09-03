@@ -30,6 +30,7 @@ export class WishlistsController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.wishlistsService.findAll();
   }

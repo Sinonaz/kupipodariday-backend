@@ -6,21 +6,29 @@ import { WishesModule } from './wishes/wishes.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
 import { OffersModule } from './offers/offers.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'student',
-      password: 'student',
-      database: 'kupipodariday',
-      schema: 'kupipodariday',
-      autoLoadEntities: true,
-      synchronize: true,
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host:
+          configService.get<string>('DATABASE_HOSTNAME') ||
+          configService.get<string>('DATABASE_HOST', 'localhost'),
+        port: Number(configService.get<number | string>('DATABASE_PORT', 5432)),
+        username:
+          configService.get<string>('DATABASE_USERNAME') ||
+          configService.get<string>('DATABASE_USER', 'student'),
+        password: configService.get<string>('DATABASE_PASSWORD', 'student'),
+        database: configService.get<string>('DATABASE_NAME', 'kupipodariday'),
+        schema: configService.get<string>('DATABASE_SCHEMA', 'kupipodariday'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
     UsersModule,
     WishesModule,
